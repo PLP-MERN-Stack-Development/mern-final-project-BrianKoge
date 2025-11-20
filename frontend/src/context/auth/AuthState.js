@@ -3,6 +3,7 @@ import axios from 'axios';
 import AuthContext from './authContext';
 import authReducer from './authReducer';
 import setAuthToken from '../../utils/setAuthToken';
+import API_URL from '../../config/api';
 import {
   REGISTER_SUCCESS,
   REGISTER_FAIL,
@@ -13,8 +14,6 @@ import {
   LOGOUT,
   CLEAR_ERRORS
 } from '../types';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const AuthState = props => {
   const initialState = {
@@ -113,9 +112,22 @@ const AuthState = props => {
       
       loadUser();
     } catch (err) {
+      let errorMessage = 'Registration failed';
+      
+      if (err.response) {
+        // Server responded with error
+        errorMessage = err.response.data?.error || err.response.data?.message || 'Registration failed';
+      } else if (err.request) {
+        // Request made but no response (network error)
+        errorMessage = 'Unable to connect to server. Please check your internet connection.';
+      } else {
+        // Something else happened
+        errorMessage = err.message || 'Registration failed';
+      }
+      
       dispatch({
         type: REGISTER_FAIL,
-        payload: err.response.data.error
+        payload: errorMessage
       });
     }
   };
@@ -135,9 +147,22 @@ const AuthState = props => {
       
       loadUser();
     } catch (err) {
+      let errorMessage = 'Login failed';
+      
+      if (err.response) {
+        // Server responded with error
+        errorMessage = err.response.data?.error || err.response.data?.message || 'Login failed';
+      } else if (err.request) {
+        // Request made but no response (network error)
+        errorMessage = 'Unable to connect to server. Please check your internet connection.';
+      } else {
+        // Something else happened
+        errorMessage = err.message || 'Login failed';
+      }
+      
       dispatch({
         type: LOGIN_FAIL,
-        payload: err.response.data.error
+        payload: errorMessage
       });
     }
   };
